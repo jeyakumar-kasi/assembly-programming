@@ -1,13 +1,13 @@
 ; Executable Name: console
-; Version: 1.0
-; Author: Jeyakumar Kasi
-; Updated On: May 14, 2025 00:38
-; Description: Move the cursor in Linux console
-; Commands:
-;          Build: nasm -f elf -F STABS -g console.asm -o console.o
+; Version        : 1.0
+; Updated On     : May 14, 2025 00:38
+; Author         : Jeyakumar Kasi <jeyakumar.kasi@hyproid.com>
+; Description    : Simple cursor control for the Linux console.
+; Commands       :
+;          Build : nasm -f elf -F STABS -g console.asm -o console.o
 ;          Linker: ld console.o -o console -m elf_i386
-;          Run: ./console
-
+;          Run   : ./console
+; ------------------------------------------------------------------------------------
 
 section .data
     WelcomeMsg: db "Welcome",10
