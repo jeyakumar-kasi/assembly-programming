@@ -44,7 +44,7 @@ section .bss                                ; Uninitialized data
 
 
 
-section .txt                                ; actual code
+section .text                                ; actual code
 
 ; -------------------------------------------------------------------
 ; Clear the terminal
@@ -57,22 +57,115 @@ Clrscr:
     mov ecx, ClearTerminal                   ; Set "Clear Terminal" ctrl message
     mov edx, ClearTerminalLen
 
-    call WriteStr                            ; send ctrl message to terminal to clear
+    call WriteStr                            ; send ctrl message to clear the terminal
 
     pop eax
     pop ebx
     pop ecx
-    pop edx
+    pop edx                                   ; Restore pertinent Registers
 
     ret                                       ; return to home
 
 
 
 
+; -------------------------------------------------------------------
+; Go to X, Y in the terminal
+GotoXY:
+    pushad
+
+    xor ebx, ebx                               ; Clear EBX, ECX register
+    xor ecx, ecx                               ;
+
+    mov bl, al                                 ; Put Y value into Sclae Term EBX
+    mov cx, word [Digits + ebx * 2]            ; Fetch decimal digits to CX (2 chars from Digits)
+    mov word [PosTerminal + 2], cx             ; Invoke Digits to control string
+
+    mov bl, ah                                 ; Put X value into Sclae Term EBX
+    mov cx, word [Digits + ebx * 2]
+    mov word [PosTerminal + 5], cx             ; Invoke Digits to control string (5th char in the given "PosTerminal" => <ESC>, "[01;01h")
+
+    ; Send control message to terminal
+    mov ecx, PosTerminal
+    mov edx, PosTerminalLen
+    call WriteStr
+
+    ; return back
+    popad
+    ret
 
 
 
-    global _start;
+; -------------------------------------------------------------------
+; Write the message at center of 80 char wide terminal
+WriteCenter:
+    push ebx
+    xor ebx, ebx                                ; clear EBX
+
+    mov bl, SCREENWIDTH                         ; Put screen width in ebx
+    sub bl, dl                                  ; Difference from SCREENWIDTH - PosTerminalLen
+    shr bl, 1                                  ; Divide difference by two (for X value)
+    mov ah, bl                                  ; GotoXY - requires X vallue in "AH" register
+
+    call GotoXY
+    call WriteStr
+
+    pop ebx
+    ret
+
+
+; -------------------------------------------------------------------
+; Print the message in terminal
+WriteStr:
+    push eax
+    push ebx
+
+    mov eax, 4                                ; sys_write
+    mov ebx, 1                                ; stdout
+    int 80h
+
+    pop eax
+    pop ebx
+    ret
+
+
+global _start
 
 _start:
-    nop;
+    nop
+
+    ; First clear the screen
+    call ClearTerminal
+
+    ; Then show the message at center of terminal
+    mov al, 12                                  ; Set "Y" value  (i.e Line no)
+
+    mov ecx, PosTerminal
+    mov edx, PosTerminalLen
+    call WriteCenter
+
+    ; Position the cursor for promtp to "Press Enter"
+    mov ax, 0117h                               ; Set X=1, Y=23 in a single Hex value
+    call GotoXY
+
+    ; Disply "Press Enter" message
+    mov ecx, Prompt
+    mov edx, PromptLen
+    call WriteStr
+
+    ; Wait for the user to press Enter key
+    mov eax, 3                                    ; sys_Read
+    mov ebx, 0                                    ; stdin
+    int 80h
+
+
+Exit:
+    mov eax, 1                                    ; sys_exit
+    mov ebx, 0                                    ; no error
+    int 80h
+
+
+
+
+
+
