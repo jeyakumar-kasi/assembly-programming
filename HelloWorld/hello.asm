@@ -1,7 +1,7 @@
 ; Hello World - Assembly program.
 ; ----------------------------------
 
-; Author		    : Jeyakumar Kasi <jai@hyproid.com>
+; Author		    : Jeyakumar Kasi <jeyakumar.kasi@hyproid.com>
 ; Created At		: 03 Jun, 2022 15:31
 ; Assemble Command	: nasm hello.asm -o hello.o -f elf -F STABS -g
 ; Linking Command	: ld hello.o -o hello -m elf_i386
@@ -19,9 +19,12 @@ SECTION .text                       ; Section for source code
 ; ------------------------------------------------------------------------------    
 
 ; _linebreak:
-;     mov al, 13
-;     int 10h
-;     mov al, 10
+;     mov al, 13
+
+;     int 10h
+
+;     mov al, 10
+
 ;     int 10h         ; display a line break
 ; 
 ; _newline:
